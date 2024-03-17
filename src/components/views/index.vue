@@ -21,10 +21,10 @@
       <el-form-item label="姓名" prop="password">
         <el-input type="text" v-model="registerForm.name" clearable></el-input>
       </el-form-item>
-      <el-form-item label="部门" >
-        <el-select v-model="registerForm.departmentId" label="请选择部门">
+      <el-form-item label="组别" >
+        <el-select v-model="registerForm.departmentId" label="请选择小组">
           <el-option
-            v-for="item in departments"
+            v-for="item in teams"
             :key="item.id"
             :label="item.name"
             :value="item.id"
@@ -48,12 +48,13 @@
 
 <script>
 import request from '../utils/request.js';
+import _ from "lodash/fp.js";
 
 export default {
   name: 'LoginForm',
   data() {
     return {
-      departments: [],
+      teams: [],
       loginForm: {
         username: '',
         password: '',
@@ -133,10 +134,10 @@ export default {
   },
   mounted() {
     request({
-      url: '/getDepartments',
+      url: '/getTeams',
       method: 'get'
     }).then(res => {
-      this.departments = res.data.data;
+      this.teams = res.data.data;
     })
   }
 };

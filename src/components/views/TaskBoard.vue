@@ -53,7 +53,7 @@
   </el-dialog>
 
   <el-dialog v-model="commentDialogVisible" title="讨论组">
-    <comments-section></comments-section>
+    <comments-section :taskId="currentTaskId"></comments-section>
   </el-dialog>
 
 </template>
@@ -75,7 +75,8 @@ export default {
       dialogVisible: false,
       selectedDateTasks: [],
       taskDic: {},
-      commentDialogVisible: false
+      commentDialogVisible: false,
+      currentTaskId: 0
     }
   },
   methods: {
@@ -100,9 +101,8 @@ export default {
       this.dialogVisible = true
     },
     openCommentSection(id) {
-      commentApi.getComments(id).then(res => {
-        this.$refs.commentsSection.comments = res.data.data
-      })
+      this.currentTaskId = id;
+      console.log(this.currentTaskId)
       this.commentDialogVisible = true;
     }
   },

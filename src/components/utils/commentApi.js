@@ -8,11 +8,17 @@ const commentApi = {
             method: 'get'
         })
     },
-    addComment(data) {
+    addComment(data, taskId) {
         return request({
-            url: '/addComment',
+            url: '/addComment/' + taskId,
             method: 'post',
             data
+        })
+    },
+    getMyComments() {
+        return request({
+            url: '/getMyComments',
+            method: 'get'
         })
     }
 

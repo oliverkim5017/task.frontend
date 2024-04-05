@@ -60,17 +60,68 @@
             </el-row>
           </el-card>
         </el-col>
+
         <el-col :span="18">
           <el-card style="height: 75vh">
+            <el-row>
+              <el-col>
+                <el-button type="text" @click="showMyMessage = false">我的评论</el-button>
+                <el-badge style="margin-left: 20px" :value="unreadMessages" @click="read">
+                  <el-button type="text" @click="showMyMessage = true">回复我的</el-button>
+                </el-badge>
+              </el-col>
+            </el-row>
 
+            <el-container style="height: 68vh" v-show="showMyMessage">
+              <el-row>
+                <el-col :span="24">
+                  <div
+                      v-for="(comment, index) in myMessage"
+                      :key="index"
+                      style="width: 100%"
+                      class="box-card scrollable-content"
+                  >
+                    <p>
+                      <span class="author">{{ comment.username }}</span>
+                      <span v-if="comment.toUserId" class="mention"> @{{ comment.toUserName }}</span>
+                      <span>:</span>
+                      <span class="timestamp">- {{ comment.createdAt }}</span>
+                      <br>
+                      <span> {{ comment.content }}</span>
+                      <el-button type="text" @click="reply(comment)">回复</el-button>
+                    </p>
+
+                  </div>
+                </el-col>
+              </el-row>
+            </el-container>
+
+
+            <el-container style="height: 68vh" v-show="!showMyMessage">
+              <el-row>
+                <el-col :span="24">
+                  <div
+                      v-for="(comment, index) in myComments"
+                      :key="index"
+                      style="width: 100%"
+                      class="box-card scrollable-content"
+                  >
+                    <p>
+                      <span class="author">{{ comment.username }}</span>
+                      <span v-if="comment.toUserId" class="mention"> @{{ comment.toUserName }}</span>
+                      <span>:</span>
+                      <span class="timestamp">- {{ comment.createdAt }}</span>
+                      <br>
+                      <span> {{ comment.content }}</span>
+                    </p>
+                  </div>
+                </el-col>
+              </el-row>
+            </el-container>
           </el-card>
         </el-col>
+
       </el-row>
-
-
-
-
-
     </el-main>
   </el-container>
 </template>
@@ -80,6 +131,7 @@
 
 import authService from "../utils/authService.js";
 import taskService from "../utils/taskService.js";
+import commentApi from "../utils/commentApi.js";
 
 export default {
   name: 'MyInfo',
@@ -89,18 +141,77 @@ export default {
         username: '',
         name: '',
       },
-      tasks: []
+      tasks: [],
+      myComments: [],
+      myMessage: [],
+      showMyMessage: false,
+      unreadMessages: 0
     }
   },
-  methods: {},
-  mounted() {
+  methods: {
+    getComments() {
+      commentApi.getMyComments().then(res => {
+        const comments = res.data.data
+        this.myComments = comments.filter(comment => comment.username === this.user.name)
+        this.myMessage = comments.filter(comment => comment.toUserName === this.user.name)
+        this.calculateUnreadMessages()
+      })
+    },
+    reply(data) {
+      const newComment = {
+        content: '',
+        toUserId: data.userId
+      }
+      this.$prompt('请输入回复内容', '回复', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /\S/,
+        inputErrorMessage: '内容不能为空'
+      }).then(({value}) => {
+        newComment.content = value
+        commentApi.addComment(newComment, data.taskId).then(res => {
+          this.getComments()
+        })
+      }).catch(() => {
+      });
+    },
+    calculateUnreadMessages() {
+      const ids =  localStorage.getItem('readMessageIds')
+      console.log('ids' + ids)
+      if (ids) {
+        const readIds = ids.split(',')
+        this.unreadMessages = this.myMessage.filter(comment => !readIds.includes(comment.id)).length
+      } else {
+        this.unreadMessages = this.myMessage.length
+        console.log(this.myMessage.length)
+      }
+      console.log(this.unreadMessages)
+    },
+    read() {
+      const ids = this.myMessage.map(comment => comment.id).join(',')
+      localStorage.setItem('readMessageIds', ids)
+      this.unreadMessages = 0
+    }
+  },
+   mounted() {
     authService.getMyInfo().then(res => {
       this.user = res.data.data
     })
     taskService.getMyTasks().then(res => {
       this.tasks = res.data.data
     })
-  }
+     this.getComments()
+
+  },
+
 }
 
 </script>
+
+<style scoped>
+.mention {
+  margin-left: 10px;
+  font-size: 0.8em;
+  color: #36e887;
+}
+</style>

@@ -56,6 +56,7 @@
 <script>
 import request from '../utils/request.js';
 import authService from "../utils/authService.js";
+import taskService from "../utils/taskService.js";
 
 export default {
   name: 'Login',
@@ -83,6 +84,7 @@ export default {
         password: [{required: true, message: '请输入密码', trigger: 'blur'}],
         name: [{required: true, message: '请输入姓名', trigger: 'blur'}],
       },
+
     };
   },
   methods: {
@@ -130,6 +132,7 @@ export default {
     }).then(res => {
       this.teams = res.data.data;
     })
+
   }
 };
 </script>

@@ -1,7 +1,7 @@
 
 import request from "./request.js";
 
-export default {
+const taskService = {
 
     getTeams() {
         return request({
@@ -20,10 +20,38 @@ export default {
             url: '/getTasks',
             method: 'get',
             params: {
-                teamIds: data.teamIds,
-                stateIds: data.stateIds
+                teamIds: data?.teamIds,
+                stateIds: data?.stateIds
             }
+        })
+    },
+    addTask(data) {
+        return request({
+            url: '/addTask',
+            method: 'post',
+            data: data
+        })
+    },
+    updateTask(data) {
+        return request({
+            url: '/updateTask',
+            method: 'put',
+            data: data
+        })
+    },
+    delTask(id) {
+        return request({
+            url: '/delTask/' + id,
+            method: 'delete'
+        })
+    },
+    getMyTasks() {
+        return request({
+            url: '/getMyTasks',
+            method: 'get'
         })
     }
 
 }
+
+export default taskService;

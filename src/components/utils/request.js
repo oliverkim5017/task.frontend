@@ -8,9 +8,7 @@ const request = axios.create({
 request.interceptors.request.use(
     config => {
         const token = localStorage.getItem('token');
-        if (token) {
-            config.headers['Authorization'] = `${token}`;
-        }
+        config.headers['Authorization'] = `${token}`;
         return config;
     },
 );
@@ -18,7 +16,7 @@ request.interceptors.request.use(
 request.interceptors.response.use(
     response => {
         if (response.data.code === 200) {
-            if (response.config.method !== 'get'){
+            if (response.config.method !== 'get') {
                 ElMessage({
                     showClose: true,
                     message: response.data.msg,

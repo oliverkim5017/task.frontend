@@ -21,5 +21,17 @@ export default {
             url: '/getTeams',
             method: 'get'
         });
+    },
+    getUsers() {
+        return request({
+            url: '/getUsers',
+            method: 'get'
+        });
+    },
+    getMyInfo() {
+        return request({
+            url: '/myInfo',
+            method: 'get'
+        });
     }
 };

@@ -36,12 +36,16 @@
           </el-sub-menu>
           <el-sub-menu index="4">
             <template #title>人员视图</template>
-            <el-menu-item index="4-1">人员管理</el-menu-item>
-            <el-menu-item index="4-2">部门管理</el-menu-item>
-            <el-menu-item index="4-3">角色管理</el-menu-item>
+            <el-menu-item index="4-1" @click="navigateTo('User')">人员管理</el-menu-item>
+            <el-menu-item index="4-2" @click="navigateTo('Department')">部门管理</el-menu-item>
+            <el-menu-item index="4-3" @click="navigateTo('Role')">角色管理</el-menu-item>
           </el-sub-menu>
-          <el-menu-item index="5">任务审批</el-menu-item>
-          <el-menu-item index="6">操作日志</el-menu-item>
+          <el-sub-menu index="5">
+            <template #title>系统配置</template>
+            <el-menu-item index="5-1" @click="navigateTo('Status')">状态管理</el-menu-item>
+          </el-sub-menu>
+          <el-menu-item index="6">任务审批</el-menu-item>
+          <el-menu-item index="7">操作日志</el-menu-item>
         </el-menu>
       </el-aside>
 

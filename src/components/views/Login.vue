@@ -27,9 +27,9 @@
             <el-input type="text" v-model="registerForm.name" clearable></el-input>
           </el-form-item>
           <el-form-item label="组别">
-            <el-select v-model="registerForm.teamId" label="请选择小组">
+            <el-select v-model="registerForm.departmentId" label="请选择小组">
               <el-option
-                  v-for="item in teams"
+                  v-for="item in hierarchicalDepartments"
                   :key="item.id"
                   :label="item.name"
                   :value="item.id"
@@ -57,12 +57,13 @@
 import request from '../utils/request.js';
 import authService from "../utils/authService.js";
 import taskService from "../utils/taskService.js";
+import api from "../utils/api.js";
 
 export default {
   name: 'Login',
   data() {
     return {
-      teams: [],
+      hierarchicalDepartments: [],
       loginForm: {
         username: '',
         password: '',
@@ -72,7 +73,7 @@ export default {
         password: '',
         rePassword: '',
         name: '',
-        teamId: ''
+        departmentId: undefined
       },
       loginFormShow: true,
       loginRules: {
@@ -123,14 +124,37 @@ export default {
     },
     switchForm() {
       this.loginFormShow = !this.loginFormShow;
+    },
+    buildHierarchy(departments) {
+
+      const departmentMap = {};
+      departments.forEach(dept => {
+        departmentMap[dept.id] = { ...dept, children: [] };
+      });
+
+      const tree = [];
+      departments.forEach(dept => {
+        if (dept.parentId) {
+          departmentMap[dept.parentId].children.push(departmentMap[dept.id]);
+        } else {
+          tree.push(departmentMap[dept.id]);
+        }
+      });
+
+      const flattenHierarchy = (node, prefix = '') => {
+        const hierarchicalNode = { id: node.id, name: `${prefix}${node.name}` };
+        return [
+          hierarchicalNode,
+          ...node.children.flatMap(child => flattenHierarchy(child, `${prefix}-`))
+        ];
+      };
+      return tree.flatMap(root => flattenHierarchy(root));
     }
   },
   mounted() {
-    request({
-      url: '/getTeams',
-      method: 'get'
-    }).then(res => {
-      this.teams = res.data.data;
+    api.getDepartments().then(res => {
+      this.departments = res.data.data
+      this.hierarchicalDepartments = this.buildHierarchy(this.departments);
     })
 
   }

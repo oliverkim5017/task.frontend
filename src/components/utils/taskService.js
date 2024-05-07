@@ -20,8 +20,9 @@ const taskService = {
             url: '/getTasks',
             method: 'get',
             params: {
-                teamIds: data?.teamIds,
-                stateIds: data?.stateIds
+                projectId: data.projectId,
+                endTime: data.endTime,
+                userId: data.userId
             }
         })
     },

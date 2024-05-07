@@ -6,11 +6,11 @@
         node-key="id"
         :expand-on-click-node="false"
         @node-click="handleNodeClick"
+        default-expand-all
     >
     </el-tree>
     <el-container style="margin-top: 60px">
       <el-button @click="addDept">添加部门</el-button>
-      <el-button @click="editDept">编辑部门</el-button>
       <el-button @click="deleteDept">删除部门</el-button>
     </el-container>
 
@@ -24,7 +24,7 @@
         <el-form-item label="上级部门">
           <el-select v-model="dept.parentId" placeholder="选择上级部门">
             <el-option
-                v-for="item in flatDeptTree"
+                v-for="item in hierarchicalDepartments"
                 :key="item.id"
                 :label="item.name"
                 :value="item.id"
@@ -38,6 +38,29 @@
       </span>
     </el-dialog>
   </div>
+
+  <el-dialog
+      title="删除部门"
+      v-model="delDialog"
+      width="30%"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+  >
+    <el-select v-model="selectedId" placeholder="请选择部门">
+      <el-option
+          v-for="item in hierarchicalDepartments"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id"
+      ></el-option>
+    </el-select>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="delDialog = false">取 消</el-button>
+      <el-button type="primary" @click="onConfirm">确 定</el-button>
+    </span>
+  </el-dialog>
+
+
 </template>
 
 
@@ -49,7 +72,7 @@ export default {
   data() {
     return {
       deptTree: [],
-      flatDeptTree: [],  // 扁平化部门列表，用于下拉选择
+      flatDeptTree: [],
       defaultProps: {
         children: 'children',
         label: 'name'
@@ -59,14 +82,18 @@ export default {
         parentId: null,
       },
       dialog: false,
-      editing: false,  // 判断是添加还是编辑状态
+      editing: false,
+      hierarchicalDepartments: [],
+      selectedId: 0,
+      delDialog: false
     };
   },
   methods: {
     loadDeptData() {
       api.getDepartments().then(response => {
         this.deptTree = this.transformToTreeData(response.data.data);
-        this.flatDeptTree = response.data.data;  // 更新扁平化数组
+        this.flatDeptTree = response.data.data;
+        this.hierarchicalDepartments = this.buildHierarchy(response.data.data);
       });
     },
     transformToTreeData(deptData) {
@@ -94,8 +121,15 @@ export default {
       this.dept = {...node.data};
       this.dialog = true;
     },
-    deleteDept(node) {
-      // 实现删除部门逻辑
+    deleteDept() {
+      this.delDialog = true
+    },
+    onConfirm() {
+      api.delDept(this.selectedId).then(() => {
+        this.delDialog = false;
+        this.selectedId = 0
+        this.loadDeptData();
+      });
     },
     handleNodeClick(node) {
       console.log('Node clicked', node);
@@ -109,6 +143,32 @@ export default {
         this.dialog = false;
         this.loadDeptData();
       });
+    },
+    buildHierarchy(departments) {
+
+      console.log(departments)
+      const departmentMap = {};
+      departments.forEach(dept => {
+        departmentMap[dept.id] = { ...dept, children: [] };
+      });
+
+      const tree = [];
+      departments.forEach(dept => {
+        if (dept.parentId) {
+          departmentMap[dept.parentId].children.push(departmentMap[dept.id]);
+        } else {
+          tree.push(departmentMap[dept.id]);
+        }
+      });
+
+      const flattenHierarchy = (node, prefix = '') => {
+        const hierarchicalNode = { id: node.id, name: `${prefix}${node.name}` };
+        return [
+          hierarchicalNode,
+          ...node.children.flatMap(child => flattenHierarchy(child, `${prefix}-`))
+        ];
+      };
+      return tree.flatMap(root => flattenHierarchy(root));
     }
   },
   mounted() {

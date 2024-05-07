@@ -55,6 +55,11 @@ const routes = [
                 name: 'Status',
                 component: () => import('../components/views/Status.vue')
             },
+            {
+                path: 'State',
+                name: 'State',
+                component: () => import('../components/views/State.vue')
+            }
         ]
     }
 ];

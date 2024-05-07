@@ -13,7 +13,6 @@
         <el-form-item>
           <el-button type="primary" @click="query"><el-icon><Search/></el-icon>搜索</el-button>
           <el-button icon="el-icon-refresh" @click="resetQuery"><el-icon><RefreshRight/></el-icon>重置</el-button>
-          <el-button type="primary" plain size="small" @click="handleAdd"><el-icon><Plus/></el-icon>新增</el-button>
         </el-form-item>
       </el-form>
     </el-col>

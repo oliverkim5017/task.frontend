@@ -4,7 +4,7 @@
       <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" label-width="68px">
         <el-form-item label="项目名称" prop="userName">
           <el-input
-              v-model="queryParams.projectName"
+              v-model="queryParams.name"
               placeholder="请输入项目名称"
               clearable
               style="width: 240px"
@@ -31,25 +31,15 @@
               style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="创建时间" prop="createTime">
-          <el-date-picker
-              v-model="queryParams.createTime"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              style="width: 240px"
-          />
-        </el-form-item>
-        <el-form-item label="更新时间" prop="createTime">
-          <el-date-picker
-              v-model="queryParams.updateTime"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              style="width: 240px"
-          />
+        <el-form-item label="所属部门" prop="departmentId">
+          <el-select v-model="queryParams.departmentId" placeholder="请选择部门" style="width: 200px">
+            <el-option
+                v-for="item in hierarchicalDepartments"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="query">
@@ -82,22 +72,34 @@
 
   <el-main>
     <el-table
+        :data="projects"
+        style="width: 100%"
+        stripe
+        border
+        height="500"
     >
       <el-table-column type="index" label="序号" width="50"></el-table-column>
-      <el-table-column prop="projectName" label="项目名称"></el-table-column>
-      <el-table-column prop="description" label="详细描述"></el-table-column>
+      <el-table-column prop="name" label="项目名称"></el-table-column>
+      <el-table-column prop="detail" label="详细描述"></el-table-column>
       <el-table-column prop="startTime" label="开始时间"></el-table-column>
       <el-table-column prop="endTime" label="结束时间"></el-table-column>
-      <el-table-column prop="status" label="状态">
-
+      <el-table-column prop="statusId" label="状态">
+        <template #default="scope">
+          <el-tag
+              :type="status.find(item => item.id === scope.row.statusId).hexCode"
+              effect="dark"
+          >
+            {{ status.find(item => item.id === scope.row.statusId)?.name }}
+          </el-tag>
+        </template>
       </el-table-column>
       <el-table-column prop="department.name" label="负责部门"></el-table-column>
       <el-table-column prop="user.name" label="责任人"></el-table-column>
       <el-table-column prop="approveUser.name" label="审核人"></el-table-column>
       <el-table-column prop="createTime" label="创建时间"></el-table-column>
+      <el-table-column prop="creator.name" label="创建者"></el-table-column>
       <el-table-column prop="updateTime" label="更新时间"></el-table-column>
-      <el-table-column prop="createdBy" label="创建者"></el-table-column>
-      <el-table-column prop="updatedBy" label="更新者"></el-table-column>
+      <el-table-column prop="updater.name" label="更新者"></el-table-column>
       <el-table-column label="操作" width="150">
         <template #default="scope">
           <el-button type="text" size="small" @click="handleEdit(scope.row)">编辑</el-button>
@@ -115,14 +117,14 @@
       :close-on-press-escape="false"
   >
     <el-form :model="project" ref="projectForm" size="small" label-width="80px">
-      <el-form-item label="项目名称" prop="projectName">
-        <el-input v-model="project.projectName" placeholder="请输入项目名称" clearable/>
+      <el-form-item label="项目名称" prop="name">
+        <el-input v-model="project.name" placeholder="请输入项目名称" clearable/>
       </el-form-item>
-      <el-form-item label="详细描述" prop="description">
-        <el-input type="textarea" v-model="project.description" placeholder="请输入详细描述" clearable/>
+      <el-form-item label="详细描述" prop="detail">
+        <el-input type="textarea" v-model="project.detail" placeholder="请输入详细描述" clearable/>
       </el-form-item>
       <el-form-item label="负责部门" prop="departmentId">
-          <el-select v-model="project.departmentId" placeholder="请选择部门">
+          <el-select v-model="project.departmentId" placeholder="请选择部门" @change="changeDepartment">
             <el-option
                 v-for="item in hierarchicalDepartments"
                 :key="item.id"
@@ -154,7 +156,8 @@
       <el-form-item label="开始时间" prop="startTime">
         <el-date-picker
             v-model="project.startTime"
-            type="datetime"
+            value-format="YYYY-MM-DD"
+            type="date"
             placeholder="选择项目开始时间"
             style="width: 240px"
         />
@@ -162,7 +165,8 @@
       <el-form-item label="结束时间" prop="endTime">
         <el-date-picker
             v-model="project.endTime"
-            type="datetime"
+            value-format="YYYY-MM-DD"
+            type="date"
             placeholder="选择项目结束时间"
             style="width: 240px"
         />
@@ -170,7 +174,7 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="dialog = false">取 消</el-button>
-      <el-button type="primary" @click="handleEdit()">确 定</el-button>
+      <el-button type="primary" @click="handleSave()">确 定</el-button>
     </div>
   </el-dialog>
 
@@ -190,7 +194,7 @@ export default {
     return {
       loading: false,
       queryParams: {
-        projectName: '',
+        name: '',
         startTime: [],
         endTime: [],
         createTime: [],
@@ -199,8 +203,8 @@ export default {
       projects: [],
       dialog: false,
       project: {
-        projectName: '',
-        description: '',
+        name: '',
+        detail: '',
         departmentId: '',
         userId: '',
         approveUserId: '',
@@ -223,7 +227,7 @@ export default {
   methods: {
     query() {
       const data = {
-        projectName: this.queryParams.projectName,
+        name: this.queryParams.name,
         startTime: this.queryParams.startTime[0] + '~' + this.queryParams.startTime[1],
         endTime: this.queryParams.endTime[0] + '~' + this.queryParams.endTime[1],
         createTime: this.queryParams.createTime[0] + '~' + this.queryParams.createTime[1],
@@ -234,25 +238,31 @@ export default {
       })
     },
     resetQuery() {
-      this.queryParams.projectName = ''
+      this.queryParams.name = ''
       this.queryParams.createTime = []
       this.queryParams.updateTime = []
       this.query()
     },
-    handleEdit() {
+    handleSave() {
       api.saveProject(this.project).then(() => {
         this.project = {}
         this.dialog = false
         this.query()
       })
     },
-    handleDelete() {
-
+    handleDelete(data) {
+      projectService.delProject(data.id).then(() => {
+        this.query()
+      })
+    },
+    handleEdit(data) {
+      this.project = { ...data }
+      this.dialog = true
     },
     handleAdd() {
       this.project = {
-        projectName: '',
-        description: '',
+        name: '',
+        detail: '',
         departmentId: '',
         userId: '',
         approveUserId: '',
@@ -260,6 +270,9 @@ export default {
         endTime: '',
       }
       this.dialog = true;
+    },
+    changeDepartment() {
+      this.project.userId = undefined
     },
     buildHierarchy(departments) {
 

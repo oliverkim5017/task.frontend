@@ -42,7 +42,8 @@
           </el-sub-menu>
           <el-sub-menu index="5">
             <template #title>系统配置</template>
-            <el-menu-item index="5-1" @click="navigateTo('Status')">状态管理</el-menu-item>
+            <el-menu-item index="5-1" @click="navigateTo('Status')">项目状态管理</el-menu-item>
+            <el-menu-item index="5-2" @click="navigateTo('State')">任务状态管理</el-menu-item>
           </el-sub-menu>
           <el-menu-item index="6">任务审批</el-menu-item>
           <el-menu-item index="7">操作日志</el-menu-item>

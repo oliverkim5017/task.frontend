@@ -21,7 +21,7 @@
 
   <el-main>
     <el-table
-        :data="status"
+        :data="states"
         style="width: 100%"
         stripe
         border
@@ -57,13 +57,13 @@
       :close-on-click-modal="false"
       :close-on-press-escape="false"
   >
-    <el-form :model="sta" ref="statusForm" size="small" label-width="80px">
+    <el-form :model="state" ref="statusForm" size="small" label-width="80px">
       <el-form-item label="状态名称" prop="name">
-        <el-input v-model="sta.name" placeholder="请输入状态名称" clearable/>
+        <el-input v-model="state.name" placeholder="请输入状态名称" clearable/>
       </el-form-item>
       <el-form-item label="是否是默认状态" prop="defaultStatus">
         <el-switch
-            v-model="sta.defaultStatus"
+            v-model="state.defaultStatus"
             active-text="是"
             inactive-text="否"
             active-color="#13ce66"
@@ -71,7 +71,7 @@
         ></el-switch>
       </el-form-item>
       <el-form-item label="状态颜色" prop="hexCode">
-        <el-color-picker v-model="sta.hexCode" show-alpha></el-color-picker>
+        <el-color-picker v-model="state.hexCode" show-alpha></el-color-picker>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -88,7 +88,7 @@ import {Plus, RefreshRight} from "@element-plus/icons-vue";
 import api from "../utils/api.js";
 
 export default {
-  name: 'Status',
+  name: 'State',
   components: {Plus, RefreshRight},
   data() {
     return {
@@ -96,18 +96,19 @@ export default {
         name: '',
       },
       dialog: false,
-      status: [],
-      sta: {
+      states: [],
+      state: {
         name: '',
         defaultStatus: false,
         hexCode: "",
+        forTask: true
       }
     }
   },
   methods: {
     query() {
-      api.getStatus(this.queryParams).then(res => {
-        this.status = res.data.data
+      api.getStates().then(res => {
+        this.states = res.data.data
       })
     },
     resetQuery() {
@@ -115,21 +116,22 @@ export default {
       this.query()
     },
     onConfirm() {
-      api.saveStatus(this.sta).then(res => {
+      api.saveStatus(this.state).then(() => {
         this.dialog = false
         this.query()
       })
     },
     handleAdd() {
-      this.sta = {
+      this.state = {
         name: '',
         defaultStatus: false,
         hexCode: "",
+        forTask: true
       }
       this.dialog = true
     },
     handleEdit(data) {
-      this.sta = data
+      this.state = data
       this.dialog = true
     },
     handleDelete(data) {

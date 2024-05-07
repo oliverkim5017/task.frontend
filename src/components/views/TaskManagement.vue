@@ -1,313 +1,260 @@
 <template>
-  <div class="container">
-    <el-header>
-      <span class="header-item">任务看板</span>
-      <el-button type="primary" class="header-item" @click="addTask">新增任务</el-button>
-      <el-select size="small"
-                 class="header-item"
-                 placeholder="选择组别"
-                 v-model="selectedTeams"
-                 clearable
-                 multiple
-      >
-        <el-option
-            v-for="item in teams"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-        >
-        </el-option>
-      </el-select>
-      <el-select size="small"
-                 class="header-item"
-                 placeholder="选择任务状态"
-                 v-model="selectedStates"
-                 clearable
-                 multiple
-      >
-        <el-option
-            v-for="item in states"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-        >
-        </el-option>
-      </el-select>
-      <el-button type="primary" class="header-item" @click="query">查询</el-button>
-    </el-header>
-    <el-main class="main">
-      <el-table
-          :data="tasks"
-      >
-        <el-table-column type="expand">
-          <template #default="props">
-            <div v-if="props.row.nodes && props.row.nodes.length > 0">
-              <el-table :data="props.row.nodes">
-                <el-table-column label="节点内容" prop="content"></el-table-column>
-                <el-table-column label="节点负责人" prop="assignedUser.name"></el-table-column>
-                <el-table-column label="节点状态" prop="taskState.name"></el-table-column>
-                <el-table-column label="截至日期" prop="deadLine"></el-table-column>
-                <el-table-column label="创建人" prop="creator.name"></el-table-column>
-                <el-table-column label="操作">
-                  <template #default="scope">
-                    <el-button type="text" @click="editTaskNode(scope.row)">编辑</el-button>
-                    <el-button type="text" @click="delTaskNode(scope.row)">删除</el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="任务内容" prop="content"></el-table-column>
-        <el-table-column label="分配组" prop="team.name" sortable></el-table-column>
-        <el-table-column label="任务状态" prop="state.name"></el-table-column>
-        <el-table-column label="截至日期" prop="deadLine" sortable></el-table-column>
-        <el-table-column label="创建人" prop="creator.name" sortable></el-table-column>
-        <el-table-column label="操作"  min-width="200px">
-          <template #default="scope">
-            <el-button type="primary" @click="editTask(scope.row)">编辑</el-button>
-            <el-button type="primary" @click="addTaskNode(scope.row)">添加子任务</el-button>
-            <el-button type="danger" @click="delTask(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-main>
-
-    <el-dialog v-model="taskDialogVisible"
-                title="编辑任务"
-                width="30%"
-    >
-      <el-form :model="task" label-width="80px">
-        <el-form-item label="任务内容">
-          <el-input v-model="task.content"></el-input>
-        </el-form-item>
-        <el-form-item label="分配组">
-          <el-select v-model="task.teamId" placeholder="请选择组别">
+  <el-header class="page-header">
+    <el-col :span="20" :xs="24">
+      <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" label-width="68px">
+        <el-form-item label="所属项目" prop="projectId">
+          <el-select v-model="queryParams.projectId" placeholder="选择项目" style="width: 200px">
             <el-option
-                v-for="item in teams"
+                v-for="item in projects"
                 :key="item.id"
                 :label="item.name"
                 :value="item.id"
-            >
-            </el-option>
+            ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="任务状态">
-          <el-select v-model="task.stateId" placeholder="请选择任务状态">
-            <el-option
-                v-for="item in states"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="截至日期">
+        <el-form-item label="结束时间" prop="endTime">
           <el-date-picker
-              v-model="task.deadLine"
-              type="date"
-              placeholder="选择日期">
-          </el-date-picker>
+              v-model="queryParams.endTime"
+              type="datetime"
+              placeholder="选择结束时间"
+              style="width: 100%"
+          ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="负责人" prop="userId">
+          <el-select v-model="queryParams.userId" placeholder="选择负责人" style="width: 200px">
+            <el-option
+                v-for="item in users"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="query"><el-icon><Search/></el-icon>搜索</el-button>
+          <el-button icon="el-icon-refresh" @click="resetQuery"><el-icon><RefreshRight/></el-icon>重置</el-button>
+          <el-button type="primary" plain size="small" @click="handleAdd"><el-icon><Plus/></el-icon>新增</el-button>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="taskDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveTask">确定</el-button>
-      </span>
-    </el-dialog>
+    </el-col>
+  </el-header>
 
-    <el-dialog v-model="taskNodeDialogVisible"
-                title="编辑任务节点"
-                width="30%"
+  <el-main>
+    <el-table
+        :data="tasks"
+        style="width: 100%"
+        stripe
+        border
+        height="500"
     >
-      <el-form :model="taskNode" label-width="80px">
-        <el-form-item label="任务内容">
-          <el-input v-model="taskNode.content"></el-input>
-        </el-form-item>
-        <el-form-item label="负责人">
-          <el-select v-model="taskNode.userId" placeholder="请选择负责人">
-            <el-option
-                v-for="item in limitUsers"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="任务状态">
-          <el-select v-model="taskNode.stateId" placeholder="请选择任务状态">
-            <el-option
-                v-for="item in states"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="截至日期">
-          <el-date-picker
-              v-model="taskNode.deadLine"
-              type="date"
-              placeholder="选择日期">
-          </el-date-picker>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="taskNodeDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveTaskNode">确定</el-button>
-      </span>
+      <el-table-column type="index" label="序号" width="50"></el-table-column>
+      <el-table-column prop="content" label="任务内容"></el-table-column>
+      <el-table-column prop="user.name" label="负责人"></el-table-column>
+      <el-table-column prop="approveUser.name" label="审批人"></el-table-column>
+      <el-table-column prop="project.name" label="所属项目"></el-table-column>
+      <el-table-column prop="parent.name" label="父任务"></el-table-column>
+      <el-table-column prop="creator.name" label="创建人"></el-table-column>
+      <el-table-column prop="createTime" label="创建时间"></el-table-column>
+      <el-table-column prop="startTime" label="开始时间"></el-table-column>
+      <el-table-column prop="endTime" label="结束时间"></el-table-column>
+      <el-table-column label="操作" width="150">
+        <template #default="scope">
+          <el-button type="text" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button type="text" size="small" @click="handleDelete(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
-    </el-dialog>
-  </div>
+  </el-main>
+
+  <el-dialog
+      title="编辑状态"
+      v-model="dialog"
+      width="30%"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+  >
+    <el-form :model="task" ref="statusForm" size="small" label-width="80px">
+      <el-form-item label="任务内容" prop="content">
+        <el-input v-model="task.content"></el-input>
+      </el-form-item>
+      <el-form-item label="负责人">
+        <el-select v-model="task.userId" placeholder="选择负责人">
+          <el-option
+              v-for="item in userUnderDepartment"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="审批人">
+        <el-select v-model="task.approveUserId" placeholder="选择审批人">
+          <el-option
+              v-for="item in users"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="所属项目">
+        <el-select v-model="task.projectId" placeholder="选择所属项目" >
+          <el-option
+              v-for="item in projects"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="父任务">
+        <el-select v-model="task.parentId" placeholder="选择父任务">
+          <el-option
+              v-for="item in tasksUnderProject"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="开始时间">
+        <el-date-picker
+            v-model="task.startTime"
+            value-format="YYYY-MM-DD hh:mm:ss"
+            type="datetime"
+            placeholder="选择开始时间"
+            style="width: 100%"
+        ></el-date-picker>
+      </el-form-item>
+      <el-form-item label="结束时间">
+        <el-date-picker
+            v-model="task.endTime"
+            value-format="YYYY-MM-DD hh:mm:ss"
+            type="datetime"
+            placeholder="选择结束时间"
+            style="width: 100%"
+        ></el-date-picker>
+      </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="dialog = false">取消</el-button>
+      <el-button type="primary" @click="onConfirm">确定</el-button>
+    </span>
+  </el-dialog>
+
+
 </template>
 
 <script>
-import taskService from "../utils/taskService.js";
-import taskNodeService from "../utils/taskNodeService.js";
-import authService from "../utils/authService.js";
+import {Plus, RefreshRight} from "@element-plus/icons-vue";
+import api from "../utils/api.js";
+import projectService from "../utils/projectService.js";
 
 export default {
   name: 'TaskManagement',
+  components: {Plus, RefreshRight},
   data() {
     return {
-      teams: [],
-      selectedTeams: [],
-      states: [],
-      selectedStates: [],
+      queryParams: {
+        projectId: undefined,
+        endTime: undefined,
+        userId: undefined
+      },
+      dialog: false,
       tasks: [],
       task: {
-        id: '',
         content: '',
-        teamId: '',
-        stateId: '',
-        deadLine: ''
-      },
-      taskNode: {
-        id: '',
-        content: '',
-        parentTaskId: '',
-        assignedUserId: '',
         userId: '',
-        deadLine: ''
+        user: {},
+        approveUserId: '',
+        approveUser: {},
+        projectId: '',
+        project: {},
+        parentId: '',
+        creatorId: '',
+        creator: {},
+        createTime: '',
+        startTime: '',
+        endTime: ''
       },
-      taskDialogVisible: false,
-      taskNodeDialogVisible: false,
-      users: [],
-      limitUsers: []
+      departments: [],
+      projects: [],
+      users: []
+    }
+  },
+  computed: {
+    userUnderDepartment: {
+      get() {
+        const p =  this.projects.find(project => project.id === this.task.projectId)
+        return this.users.filter(user => user.departmentId === p?.departmentId)
+      }
+    },
+    tasksUnderProject: {
+      get() {
+        return this.tasks.filter(task => task.projectId === this.task.projectId)
+      }
     }
   },
   methods: {
     query() {
-      this.tasks = [];
-      const selectedTeams = this.selectedTeams.join(',');
-      const selectedStates = this.selectedStates.join(',');
-      taskService.getTasks({
-        teamIds: selectedTeams,
-        stateIds: selectedStates
-      }).then(res => {
-        this.tasks = res.data.data;
+      api.getTasks(this.queryParams).then(res => {
+        this.tasks = res.data.data
       })
     },
-    delTaskNode(data) {
-      taskNodeService.delTaskNode(data.id).then(res => {
-        this.query();
+    resetQuery() {
+      this.queryParams = {}
+      this.query()
+    },
+    onConfirm() {
+      api.saveTask(this.task).then(res => {
+        this.dialog = false
+        this.query()
       })
     },
-    editTaskNode(data) {
-      this.taskNode = {
-        id: data.id,
-        content: data.content,
-        parentTaskId: data.parentTaskId,
-        userId: data.userId,
-        stateId: data.stateId,
-        deadLine: data.deadLine
-      }
-      this.limitUsers = this.users.filter(u => u.teamId === data.assignedUser.teamId);
-      this.taskNodeDialogVisible = true;
-    },
-    addTask() {
+    handleAdd() {
       this.task = {
-        id: '',
         content: '',
-        teamId: '',
-        stateId: '',
-        deadLine: ''
-      }
-
-      this.taskDialogVisible = true;
-    },
-    editTask(data) {
-      this.task = {...data}
-      this.taskDialogVisible = true;
-    },
-    addTaskNode(data) {
-      this.taskNode = {
-        id: '',
-        content: '',
-        parentTaskId: data.id,
         userId: '',
-        deadLine: ''
+        user: {},
+        approveUserId: '',
+        approveUser: {},
+        projectId: '',
+        project: {},
+        parentId: '',
+        creatorId: '',
+        creator: {},
+        createTime: '',
+        startTime: '',
+        endTime: ''
       }
-      this.limitUsers = this.users.filter(u => u.teamId === data.teamId);
-      this.taskNodeDialogVisible = true;
+      this.dialog = true
     },
-    handleSaveTask() {
-      if (this.task.id) {
-        taskService.updateTask(this.task).then(res => {
-          const task = res.data.data;
-          const index = this.tasks.findIndex(t => t.id === task.id);
-          this.tasks.splice(index, 1, task);
-          this.taskDialogVisible = false;
-        })
-      } else {
-        taskService.addTask(this.task).then(res => {
-          const task = res.data.data;
-          this.tasks.push(task);
-          this.taskDialogVisible = false;
-        })
-      }
+    handleEdit(data) {
+      this.task = data
+      this.dialog = true
     },
-    handleSaveTaskNode() {
-      console.log(this.taskNode)
-      if (this.taskNode.id) {
-        taskNodeService.updateTaskNode(this.taskNode).then(res => {
-          this.query();
-          this.taskNodeDialogVisible = false;
-        })
-      } else {
-        taskNodeService.addTaskNode(this.taskNode).then(res => {
-         this.query();
-          this.taskNodeDialogVisible = false;
-        })
-      }
-    },
-    delTask(data) {
-      taskService.delTask(data.id).then(res => {
-        this.query();
+    handleDelete(data) {
+      api.delTask(data.id).then(res => {
+        this.query()
       })
-    }
+    },
   },
   mounted() {
-    taskService.getTeams().then(res => {
-      this.teams = res.data.data;
+    api.getDepartments().then(res => {
+      this.departments = res.data.data
     })
-    taskService.getStates().then(res => {
-      this.states = res.data.data;
+    projectService.getProjects().then(res => {
+      this.projects = res.data.data
     })
-    authService.getUsers().then(res => {
-      this.users = res.data.data;
+    api.getUser().then(res => {
+      this.users = res.data.data
     })
   }
 }
 </script>
 
 <style scoped>
-.header-item {
-  flex: 1;
-  max-width: 200px; /* 限制最大宽度，根据需要调整 */
-  margin-left: 20px;
-}
+
 </style>

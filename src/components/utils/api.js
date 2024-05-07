@@ -36,10 +36,14 @@ export default {
             method: 'delete',
         })
     },
-    getStatus() {
+    getStatus(data) {
         return request({
             url: '/getStatus',
             method: 'get',
+            params: {
+                name: data?.name,
+                forTask: false
+            }
         })
     },
     saveStatus(sta) {
@@ -57,7 +61,7 @@ export default {
     },
     saveProject(data) {
         return request({
-            url: '/saveProjects',
+            url: '/saveProject',
             method: 'post',
             data: data,
         })
@@ -73,8 +77,8 @@ export default {
             url: '/getUser',
             method: 'get',
             params: {
-                username: data.username,
-                name: data.name
+                username: data?.username,
+                name: data?.name
             }
         })
     },
@@ -83,6 +87,29 @@ export default {
             url: '/saveUser',
             method: 'post',
             data: user
+        })
+    },
+    delDept(id) {
+        return request({
+            url: '/delDept/' + id,
+            method: 'delete'
+        })
+    },
+    getStates(data) {
+        return request({
+            url: '/getStatus',
+            method: 'get',
+            params: {
+                name: data?.name,
+                forTask: true,
+            }
+        })
+    },
+    saveTask(data) {
+        return request({
+            url: '/saveTask',
+            method: 'post',
+            data: data
         })
     }
 }

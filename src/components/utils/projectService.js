@@ -6,12 +6,18 @@ export default {
             url: '/getProjects',
             method: 'get',
             params: {
-                projectName: data.projectName,
-                startTime: data.startTime,
-                endTime: data.endTime,
-                createTime: data.createTime,
-                updateTime: data.createTime,
+                projectName: data?.projectName,
+                startTime: data?.startTime,
+                endTime: data?.endTime,
+                createTime: data?.createTime,
+                updateTime: data?.createTime,
             }
+        })
+    },
+    delProject(id){
+        return request({
+            url: '/delProject/' + id,
+            method: 'delete',
         })
     }
 

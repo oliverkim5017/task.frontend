@@ -19,7 +19,7 @@ export default {
             url: '/getRoles',
             method: 'get',
             params: {
-                name: queryParams.name
+                name: queryParams?.name
             }
         })
     },
@@ -53,6 +53,36 @@ export default {
         return request({
             url: '/delStatus/' + id,
             method: 'delete'
+        })
+    },
+    saveProject(data) {
+        return request({
+            url: '/saveProjects',
+            method: 'post',
+            data: data,
+        })
+    },
+    getUsers() {
+        return request({
+            url: '/getUsers',
+            method: 'get'
+        })
+    },
+    getUser(data) {
+        return request({
+            url: '/getUser',
+            method: 'get',
+            params: {
+                username: data.username,
+                name: data.name
+            }
+        })
+    },
+    saveUser(user) {
+        return request({
+            url: '/saveUser',
+            method: 'post',
+            data: user
         })
     }
 }

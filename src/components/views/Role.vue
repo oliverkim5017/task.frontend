@@ -5,7 +5,7 @@
         <el-form-item label="角色名称" prop="userName">
           <el-input
               v-model="queryParams.name"
-              placeholder="请输入项目名称"
+              placeholder="请输入角色名称"
               clearable
               style="width: 240px"
           />

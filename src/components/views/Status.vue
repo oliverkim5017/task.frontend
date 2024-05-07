@@ -2,10 +2,10 @@
   <el-header class="page-header">
     <el-col :span="20" :xs="24">
       <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" label-width="68px">
-        <el-form-item label="角色名称" prop="userName">
+        <el-form-item label="名称" prop="userName">
           <el-input
               v-model="queryParams.name"
-              placeholder="请输入项目名称"
+              placeholder="请输入状态名称"
               clearable
               style="width: 240px"
           />
@@ -29,9 +29,9 @@
     >
       <el-table-column type="index" label="序号" width="50"></el-table-column>
       <el-table-column prop="name" label="状态名称"></el-table-column>
-      <el-table-column prop="isDefault" label="是否是默认状态">
+      <el-table-column prop="defaultStatus" label="是否是默认状态">
         <template #default="scope">
-          <el-tag v-if="scope.row.isDefault" type="success">是</el-tag>
+          <el-tag v-if="scope.row.defaultStatus" type="success">是</el-tag>
           <el-tag v-else type="danger">否</el-tag>
         </template>
       </el-table-column>
@@ -61,9 +61,9 @@
       <el-form-item label="状态名称" prop="name">
         <el-input v-model="sta.name" placeholder="请输入状态名称" clearable/>
       </el-form-item>
-      <el-form-item label="是否是默认状态" prop="isDefault">
+      <el-form-item label="是否是默认状态" prop="defaultStatus">
         <el-switch
-            v-model="sta.isDefault"
+            v-model="sta.defaultStatus"
             active-text="是"
             inactive-text="否"
             active-color="#13ce66"
@@ -99,7 +99,7 @@ export default {
       status: [],
       sta: {
         name: '',
-        isDefault: false,
+        defaultStatus: false,
         hexCode: "",
       }
     }
@@ -123,7 +123,7 @@ export default {
     handleAdd() {
       this.sta = {
         name: '',
-        isDefault: false,
+        defaultStatus: false,
         hexCode: "",
       }
       this.dialog = true

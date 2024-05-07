@@ -52,14 +52,29 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="query"><el-icon><Search /></el-icon>搜索</el-button>
-          <el-button icon="el-icon-refresh" @click="resetQuery"><el-icon><RefreshRight/></el-icon>重置</el-button>
+          <el-button type="primary" @click="query">
+            <el-icon>
+              <Search/>
+            </el-icon>
+            搜索
+          </el-button>
+          <el-button icon="el-icon-refresh" @click="resetQuery">
+            <el-icon>
+              <RefreshRight/>
+            </el-icon>
+            重置
+          </el-button>
           <el-button
               type="primary"
               plain
               size="small"
               @click="handleAdd"
-          ><el-icon><Plus /></el-icon> 新增</el-button>
+          >
+            <el-icon>
+              <Plus/>
+            </el-icon>
+            新增
+          </el-button>
         </el-form-item>
       </el-form>
     </el-col>
@@ -67,7 +82,7 @@
 
   <el-main>
     <el-table
-      >
+    >
       <el-table-column type="index" label="序号" width="50"></el-table-column>
       <el-table-column prop="projectName" label="项目名称"></el-table-column>
       <el-table-column prop="description" label="详细描述"></el-table-column>
@@ -76,6 +91,9 @@
       <el-table-column prop="status" label="状态">
 
       </el-table-column>
+      <el-table-column prop="department.name" label="负责部门"></el-table-column>
+      <el-table-column prop="user.name" label="责任人"></el-table-column>
+      <el-table-column prop="approveUser.name" label="审核人"></el-table-column>
       <el-table-column prop="createTime" label="创建时间"></el-table-column>
       <el-table-column prop="updateTime" label="更新时间"></el-table-column>
       <el-table-column prop="createdBy" label="创建者"></el-table-column>
@@ -103,7 +121,37 @@
       <el-form-item label="详细描述" prop="description">
         <el-input type="textarea" v-model="project.description" placeholder="请输入详细描述" clearable/>
       </el-form-item>
-      <el-form-item label="项目开始时间" prop="startTime">
+      <el-form-item label="负责部门" prop="departmentId">
+        <el-select v-model="project.departmentId" placeholder="请选择负责部门" clearable>
+          <el-option
+              v-for="item in departments"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="责任人" prop="userId">
+        <el-select v-model="project.userId" placeholder="请选择责任人" clearable>
+          <el-option
+              v-for="item in usersUnderDepartment"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="审核人" prop="approveUserId">
+        <el-select v-model="project.approveUserId" placeholder="请选择审核人" clearable>
+          <el-option
+              v-for="item in users"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="开始时间" prop="startTime">
         <el-date-picker
             v-model="project.startTime"
             type="datetime"
@@ -111,7 +159,7 @@
             style="width: 240px"
         />
       </el-form-item>
-      <el-form-item label="项目结束时间" prop="endTime">
+      <el-form-item label="结束时间" prop="endTime">
         <el-date-picker
             v-model="project.endTime"
             type="datetime"
@@ -122,7 +170,7 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="dialog = false">取 消</el-button>
-      <el-button type="primary" @click="handleEdit">确 定</el-button>
+      <el-button type="primary" @click="handleEdit()">确 定</el-button>
     </div>
   </el-dialog>
 
@@ -153,8 +201,22 @@ export default {
       project: {
         projectName: '',
         description: '',
+        departmentId: '',
+        userId: '',
+        approveUserId: '',
+        startTime: '',
+        endTime: '',
       },
-      status: []
+      status: [],
+      departments: [],
+      users: [],
+    }
+  },
+  computed: {
+    usersUnderDepartment: {
+      get() {
+        return this.users.filter(user => user.departmentId === this.project.departmentId)
+      }
     }
   },
   methods: {
@@ -177,16 +239,24 @@ export default {
       this.query()
     },
     handleEdit() {
-
+      api.saveProject(this.project).then(() => {
+        this.project = {}
+        this.dialog = false
+        this.query()
+      })
     },
     handleDelete() {
 
     },
     handleAdd() {
-      console.log(1)
       this.project = {
         projectName: '',
         description: '',
+        departmentId: '',
+        userId: '',
+        approveUserId: '',
+        startTime: '',
+        endTime: '',
       }
       this.dialog = true;
     }
@@ -194,6 +264,12 @@ export default {
   mounted() {
     api.getStatus().then(res => {
       this.status = res.data.data;
+    })
+    api.getDepartments().then(res => {
+      this.departments = res.data.data;
+    })
+    api.getUsers().then(res => {
+      this.users = res.data.data;
     })
   }
 }

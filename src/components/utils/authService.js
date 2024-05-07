@@ -22,12 +22,7 @@ export default {
             method: 'get'
         });
     },
-    getUsers() {
-        return request({
-            url: '/getUsers',
-            method: 'get'
-        });
-    },
+
     getMyInfo() {
         return request({
             url: '/myInfo',

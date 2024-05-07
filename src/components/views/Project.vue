@@ -122,14 +122,14 @@
         <el-input type="textarea" v-model="project.description" placeholder="请输入详细描述" clearable/>
       </el-form-item>
       <el-form-item label="负责部门" prop="departmentId">
-        <el-select v-model="project.departmentId" placeholder="请选择负责部门" clearable>
-          <el-option
-              v-for="item in departments"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-          />
-        </el-select>
+          <el-select v-model="project.departmentId" placeholder="请选择部门">
+            <el-option
+                v-for="item in hierarchicalDepartments"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            ></el-option>
+          </el-select>
       </el-form-item>
       <el-form-item label="责任人" prop="userId">
         <el-select v-model="project.userId" placeholder="请选择责任人" clearable>
@@ -210,6 +210,7 @@ export default {
       status: [],
       departments: [],
       users: [],
+      hierarchicalDepartments: []
     }
   },
   computed: {
@@ -259,6 +260,31 @@ export default {
         endTime: '',
       }
       this.dialog = true;
+    },
+    buildHierarchy(departments) {
+
+      const departmentMap = {};
+      departments.forEach(dept => {
+        departmentMap[dept.id] = { ...dept, children: [] };
+      });
+
+      const tree = [];
+      departments.forEach(dept => {
+        if (dept.parentId) {
+          departmentMap[dept.parentId].children.push(departmentMap[dept.id]);
+        } else {
+          tree.push(departmentMap[dept.id]);
+        }
+      });
+
+      const flattenHierarchy = (node, prefix = '') => {
+        const hierarchicalNode = { id: node.id, name: `${prefix}${node.name}` };
+        return [
+          hierarchicalNode,
+          ...node.children.flatMap(child => flattenHierarchy(child, `${prefix}-`))
+        ];
+      };
+      return tree.flatMap(root => flattenHierarchy(root));
     }
   },
   mounted() {
@@ -267,6 +293,7 @@ export default {
     })
     api.getDepartments().then(res => {
       this.departments = res.data.data;
+      this.hierarchicalDepartments = this.buildHierarchy(this.departments);
     })
     api.getUsers().then(res => {
       this.users = res.data.data;

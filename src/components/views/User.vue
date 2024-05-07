@@ -71,7 +71,7 @@
       <el-form-item label="部门">
         <el-select v-model="user.departmentId" placeholder="请选择部门">
           <el-option
-              v-for="item in departments"
+              v-for="item in hierarchicalDepartments"
               :key="item.id"
               :label="item.name"
               :value="item.id"
@@ -130,7 +130,8 @@ export default {
         disabled: false
       },
       departments: [],
-      roles: []
+      roles: [],
+      hierarchicalDepartments: []
     }
   },
   methods: {
@@ -167,10 +168,36 @@ export default {
         this.query()
       })
     },
+    buildHierarchy(departments) {
+
+      const departmentMap = {};
+      departments.forEach(dept => {
+        departmentMap[dept.id] = { ...dept, children: [] };
+      });
+
+      const tree = [];
+      departments.forEach(dept => {
+        if (dept.parentId) {
+          departmentMap[dept.parentId].children.push(departmentMap[dept.id]);
+        } else {
+          tree.push(departmentMap[dept.id]);
+        }
+      });
+
+      const flattenHierarchy = (node, prefix = '') => {
+        const hierarchicalNode = { id: node.id, name: `${prefix}${node.name}` };
+        return [
+          hierarchicalNode,
+          ...node.children.flatMap(child => flattenHierarchy(child, `${prefix}-`))
+        ];
+      };
+      return tree.flatMap(root => flattenHierarchy(root));
+    }
   },
   mounted() {
     api.getDepartments().then(res => {
       this.departments = res.data.data
+      this.hierarchicalDepartments = this.buildHierarchy(this.departments);
     })
     api.getRoles().then(res => {
       this.roles = res.data.data

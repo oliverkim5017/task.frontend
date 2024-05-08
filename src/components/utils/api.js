@@ -158,5 +158,35 @@ export default {
             method: 'post',
             data: data
         })
+    },
+    getProjectSummary(data) {
+        return request({
+            url: '/getProjectSummary',
+            method: 'get',
+            params: {
+                year: data.year,
+                month: data.month
+            }
+        })
+    },
+    getTaskSummary(data) {
+        return request({
+            url: '/getTaskSummary',
+            method: 'get',
+            params: {
+                year: data.year,
+                month: data.month
+            }
+        })
+    },
+    getProjectOfDepartmentSummary(data) {
+        return request({
+            url: '/getProjectOfDepartmentSummary',
+            method: 'get',
+            params: {
+                year: data.year,
+                month: data.month
+            }
+        })
     }
 }

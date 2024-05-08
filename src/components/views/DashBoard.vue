@@ -24,28 +24,27 @@
                  text-color="#fff"
         >
           <el-menu-item index="1" @click="navigateTo('MyInfo')">主页</el-menu-item>
-          <el-sub-menu index="2" v-if="role.name !== '组员'">
+          <el-menu-item index="10" @click="navigateTo('TaskBoard')"><el-icon><Menu /></el-icon>看板</el-menu-item>
+          <el-sub-menu index="20" v-if="role.name !== '组员'">
             <template #title>项目视图</template>
-            <el-menu-item index="2-1" @click="navigateTo('Project')">项目管理</el-menu-item>
+            <el-menu-item index="20-1" @click="navigateTo('Project')"><el-icon><Management /></el-icon>项目管理</el-menu-item>
           </el-sub-menu>
-          <el-sub-menu index="3">
+          <el-sub-menu index="30">
             <template #title>任务视图</template>
-            <el-menu-item index="3-1" @click="navigateTo('TaskBoard')"><el-icon><Menu /></el-icon>任务看板</el-menu-item>
-            <el-menu-item index="3-2" v-if="role.name !== '组员'" @click="navigateTo('TaskManagement')"><el-icon><Pointer/></el-icon>任务管理</el-menu-item>
+            <el-menu-item index="30-1" v-if="role.name !== '组员'" @click="navigateTo('TaskManagement')"><el-icon><Pointer/></el-icon>任务管理</el-menu-item>
           </el-sub-menu>
-          <el-sub-menu index="4"  v-if="role.name !== '组员'">
+          <el-sub-menu index="40"  v-if="role.name !== '组员'">
             <template #title>人员视图</template>
-            <el-menu-item index="4-1" @click="navigateTo('User')">人员管理</el-menu-item>
-            <el-menu-item index="4-2" @click="navigateTo('Department')">部门管理</el-menu-item>
-            <el-menu-item index="4-3" @click="navigateTo('Role')">角色管理</el-menu-item>
+            <el-menu-item index="40-1" @click="navigateTo('User')">人员管理</el-menu-item>
+            <el-menu-item index="40-2" @click="navigateTo('Department')">部门管理</el-menu-item>
+            <el-menu-item index="40-3" @click="navigateTo('Role')">角色管理</el-menu-item>
           </el-sub-menu>
-          <el-sub-menu index="5"  v-if="role.name === '管理员'">
+          <el-sub-menu index="50"  v-if="role.name === '管理员'">
             <template #title>系统配置</template>
-            <el-menu-item index="5-1" @click="navigateTo('Status')">项目状态管理</el-menu-item>
-            <el-menu-item index="5-2" @click="navigateTo('State')">任务状态管理</el-menu-item>
+            <el-menu-item index="50-1" @click="navigateTo('Status')">项目状态管理</el-menu-item>
+            <el-menu-item index="50-2" @click="navigateTo('State')">任务状态管理</el-menu-item>
           </el-sub-menu>
-          <el-menu-item index="6" v-if="role.name === '管理员'">任务审批</el-menu-item>
-          <el-menu-item index="7"  v-if="role.name === '管理员'" @click="navigateTo('OperationLog')">操作日志</el-menu-item>
+          <el-menu-item index="60"  v-if="role.name === '管理员'" @click="navigateTo('OperationLog')">操作日志</el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -58,14 +57,14 @@
 </template>
 
 <script>
-import {Pointer} from "@element-plus/icons-vue";
+import {Management, Pointer} from "@element-plus/icons-vue";
 import Api from "../utils/api.js";
 import api from "../utils/api.js";
 import authService from "../utils/authService.js";
 
 export default {
   name: 'DashBoard',
-  components: {Pointer},
+  components: {Management, Pointer},
   data() {
     return {
       role: {},

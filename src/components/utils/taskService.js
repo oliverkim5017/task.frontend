@@ -21,6 +21,7 @@ const taskService = {
             method: 'get',
             params: {
                 projectId: data.projectId,
+                startTime: data.startTime,
                 endTime: data.endTime,
                 userId: data.userId
             }

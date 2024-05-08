@@ -19,6 +19,7 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               style="width: 240px"
+              value-format="YYYY-MM-DD"
           />
         </el-form-item>
         <el-form-item label="结束时间" prop="createTime">
@@ -29,6 +30,7 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               style="width: 240px"
+              value-format="YYYY-MM-DD"
           />
         </el-form-item>
         <el-form-item label="所属部门" prop="departmentId">
@@ -239,8 +241,8 @@ export default {
     },
     resetQuery() {
       this.queryParams.name = ''
-      this.queryParams.createTime = []
-      this.queryParams.updateTime = []
+      this.queryParams.startTime = []
+      this.queryParams.endTime = []
       this.query()
     },
     handleSave() {

@@ -30,7 +30,7 @@
             <el-menu-item index="20-1" @click="navigateTo('Project')"><el-icon><Management /></el-icon>项目管理</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="30">
-            <template #title>任务视图</template>
+            <template #title v-if="role.name !== '组员'">任务视图</template>
             <el-menu-item index="30-1" v-if="role.name !== '组员'" @click="navigateTo('TaskManagement')"><el-icon><Pointer/></el-icon>任务管理</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="40"  v-if="role.name !== '组员'">

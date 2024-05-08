@@ -281,6 +281,7 @@ export default {
     api.getUser().then(res => {
       this.users = res.data.data
     })
+
   }
 }
 </script>

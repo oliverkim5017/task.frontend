@@ -111,5 +111,11 @@ export default {
             method: 'post',
             data: data
         })
+    },
+    getOperationLog() {
+        return request({
+            url: '/getOperationLog',
+            method: 'get',
+        })
     }
 }

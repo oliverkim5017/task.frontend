@@ -139,7 +139,7 @@ export default {
     },
   },
   mounted() {
-
+    this.query()
   }
 }
 </script>

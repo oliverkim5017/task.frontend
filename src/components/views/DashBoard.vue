@@ -46,7 +46,7 @@
             <el-menu-item index="5-2" @click="navigateTo('State')">任务状态管理</el-menu-item>
           </el-sub-menu>
           <el-menu-item index="6">任务审批</el-menu-item>
-          <el-menu-item index="7">操作日志</el-menu-item>
+          <el-menu-item index="7" @click="navigateTo('OperationLog')">操作日志</el-menu-item>
         </el-menu>
       </el-aside>
 

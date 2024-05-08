@@ -59,6 +59,11 @@ const routes = [
                 path: 'State',
                 name: 'State',
                 component: () => import('../components/views/State.vue')
+            },
+            {
+                path: 'OperationLog',
+                name: 'OperationLog',
+                component: () => import('../components/views/OperationLog.vue')
             }
         ]
     }

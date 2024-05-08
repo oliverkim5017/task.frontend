@@ -37,7 +37,13 @@
       </el-table-column>
       <el-table-column prop="hexCode" label="状态颜色">
         <template #default="scope">
-          <el-tag :style="{backgroundColor: scope.row.hexCode}">{{scope.row.hexCode}}</el-tag>
+          <el-tag :style="{backgroundColor: scope.row.hexCode}"></el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="forFinish" label="是完成状态">
+        <template #default="scope">
+          <el-tag v-if="scope.row.forFinish" type="success">是</el-tag>
+          <el-tag v-else type="danger">否</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="150">
@@ -73,6 +79,15 @@
       <el-form-item label="状态颜色" prop="hexCode">
         <el-color-picker v-model="sta.hexCode" show-alpha></el-color-picker>
       </el-form-item>
+      <el-form-item label="是否是完成状态" prop="forFinish">
+        <el-switch
+            v-model="sta.forFinish"
+            active-text="是"
+            inactive-text="否"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+        ></el-switch>
+      </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="dialog = false">取 消</el-button>
@@ -101,6 +116,7 @@ export default {
         name: '',
         defaultStatus: false,
         hexCode: "",
+        forFinish: false
       }
     }
   },
@@ -125,6 +141,7 @@ export default {
         name: '',
         defaultStatus: false,
         hexCode: "",
+        forFinish: false
       }
       this.dialog = true
     },

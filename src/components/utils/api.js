@@ -117,5 +117,46 @@ export default {
             url: '/getOperationLog',
             method: 'get',
         })
+    },
+    startApproval(data) {
+        return request({
+            url: '/startApproval',
+            method: "post",
+            data: {
+                id: data.id,
+                taskId: data.taskId,
+                remarks: data.remarks,
+                forFinish: data.forFinish
+            }
+        })
+    },
+    getApproval(data) {
+        return request({
+            url: '/getApproval',
+            method: 'get',
+            params: {
+                taskId: data.id,
+                userId: data.userId
+            }
+        })
+    },
+    getToApprove() {
+        return request({
+            url: '/getToApprove',
+            method: 'get'
+        })
+    },
+    getTaskById(id) {
+        return request({
+            url: '/getTaskById/' + id,
+            method: 'get'
+        })
+    },
+    approveReply(data) {
+        return request({
+            url: '/approveReply',
+            method: 'post',
+            data: data
+        })
     }
 }

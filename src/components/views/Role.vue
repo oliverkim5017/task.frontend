@@ -53,8 +53,8 @@
       </el-table-column>
       <el-table-column label="操作" width="150">
         <template #default="scope">
-          <el-button type="text" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button type="text" size="small" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button type="text" size="small" @click="handleEdit(scope.row)" v-if="scope.row.name !== '管理员'">编辑</el-button>
+          <el-button type="text" size="small" @click="handleDelete(scope.row)" v-if="scope.row.name !== '管理员'">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -76,12 +76,14 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const isAuthenticated = localStorage.getItem('token');
-    // 检查用户是否已经登录，如果尝试访问的不是登录页面，并且没有 token，则重定向到登录页面
-    if (to.name !== 'Login' && !isAuthenticated) {
+    if (!isAuthenticated && to.name !== 'Login') {
         next({name: 'Login'});
+    } else if (isAuthenticated && to.path === '/DashBoard') {
+        next({name: 'MyInfo'});
     } else {
-        next(); // 否则继续
+        next();
     }
 });
+
 
 export default router;

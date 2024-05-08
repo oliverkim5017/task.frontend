@@ -27,13 +27,23 @@
       <el-table-column type="index" label="序号" width="50"></el-table-column>
       <el-table-column label="任务内容">
         <template #default="{ row }">
-          <span v-html="'—'.repeat(row.level)"></span>
+          <span v-html="' — '.repeat(row.level)"></span>
           {{ row.content }}
         </template>
       </el-table-column>
       <el-table-column prop="user.name" label="负责人"></el-table-column>
       <el-table-column prop="approveUser.name" label="审批人"></el-table-column>
       <el-table-column prop="project.name" label="所属项目"></el-table-column>
+      <el-table-column prop="stateId" label="状态">
+        <template #default="scope">
+          <el-tag
+              :color="states.find(item => item.id === scope.row.stateId).hexCode"
+              effect="dark"
+          >
+            {{ states.find(item => item.id === scope.row.stateId)?.name }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="creator.name" label="创建人"></el-table-column>
       <el-table-column prop="createTime" label="创建时间"></el-table-column>
       <el-table-column prop="startTime" label="开始时间"></el-table-column>
@@ -99,6 +109,16 @@
           ></el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="状态">
+        <el-select v-model="task.stateId" placeholder="选择状态">
+          <el-option
+              v-for="item in states"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          ></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="开始时间">
         <el-date-picker
             v-model="task.startTime"
@@ -157,6 +177,7 @@ export default {
         projectId: '',
         project: {},
         parentId: '',
+        stateId: '',
         creatorId: '',
         creator: {},
         createTime: '',
@@ -165,7 +186,8 @@ export default {
       },
       departments: [],
       projects: [],
-      users: []
+      users: [],
+      states: []
     }
   },
   computed: {
@@ -280,6 +302,9 @@ export default {
     })
     api.getUser().then(res => {
       this.users = res.data.data
+    })
+    api.getStates().then(res => {
+      this.states = res.data.data
     })
 
   }

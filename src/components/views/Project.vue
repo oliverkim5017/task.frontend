@@ -88,7 +88,7 @@
       <el-table-column prop="statusId" label="状态">
         <template #default="scope">
           <el-tag
-              :type="status.find(item => item.id === scope.row.statusId).hexCode"
+              :color="status.find(item => item.id === scope.row.statusId).hexCode"
               effect="dark"
           >
             {{ status.find(item => item.id === scope.row.statusId)?.name }}
@@ -155,6 +155,16 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="当前状态" prop="statusId">
+        <el-select v-model="project.statusId" placeholder="请选择当前状态" clearable>
+          <el-option
+              v-for="item in status"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="开始时间" prop="startTime">
         <el-date-picker
             v-model="project.startTime"
@@ -212,6 +222,7 @@ export default {
         approveUserId: '',
         startTime: '',
         endTime: '',
+        statusId: ''
       },
       status: [],
       departments: [],
@@ -270,6 +281,7 @@ export default {
         approveUserId: '',
         startTime: '',
         endTime: '',
+        statusId: ''
       }
       this.dialog = true;
     },

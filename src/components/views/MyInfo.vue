@@ -23,7 +23,7 @@
             <el-row>
               <el-col :span="24">
                 <span>组别：</span>
-                <span>{{ this.user.team?.name }}</span>
+                <span>{{ this.user.department?.name }}</span>
               </el-col>
             </el-row>
             <el-row>
@@ -38,7 +38,7 @@
 
 
       <el-row>
-        <el-col :span="6">
+        <el-col :span="12">
           <el-card>
             <el-row>
               <el-col :span="24">
@@ -52,77 +52,101 @@
                     class="scrolling-table"
                     max-height="85vh"
                 >
-                  <el-table-column label="任务" prop="content"></el-table-column>
-                  <el-table-column label="状态" prop="taskState.name"></el-table-column>
-                  <el-table-column label="截至日期" prop="deadLine" sortable></el-table-column>
+                  <el-table-column label="任务" prop="content" ></el-table-column>
+                  <el-table-column label="状态" prop="state.name"></el-table-column>
+                  <el-table-column label="截至日期" prop="endTime" sortable></el-table-column>
+                  <el-table-column min-width="200px">
+                    <template #default="scope">
+                      <el-button type="primary" @click="startApproval(scope.row)">已完成，提交审核</el-button>
+                      <el-button type="warning" @click="specialApproval(scope.row)">特殊情况，提交申请</el-button>
+                    </template>
+                  </el-table-column>
                 </el-table>
               </el-col>
             </el-row>
           </el-card>
         </el-col>
 
-        <el-col :span="18">
+        <el-col :span="12">
           <el-card style="height: 75vh">
             <el-row>
-              <el-col>
-                <el-button type="text" @click="showMyMessage = false">我的评论</el-button>
-                <el-badge style="margin-left: 20px" :value="unreadMessages" @click="read">
-                  <el-button type="text" @click="showMyMessage = true">回复我的</el-button>
-                </el-badge>
-              </el-col>
+             <span>待审核</span>
             </el-row>
-
-            <el-container style="height: 68vh" v-show="showMyMessage">
-              <el-row>
-                <el-col :span="24">
-                  <div
-                      v-for="(comment, index) in myMessage"
-                      :key="index"
-                      style="width: 100%"
-                      class="box-card scrollable-content"
-                  >
-                    <p>
-                      <span class="author">{{ comment.username }}</span>
-                      <span v-if="comment.toUserId" class="mention"> @{{ comment.toUserName }}</span>
-                      <span>:</span>
-                      <span class="timestamp">- {{ comment.createdAt }}</span>
-                      <br>
-                      <span> {{ comment.content }}</span>
-                      <el-button type="text" @click="reply(comment)">回复</el-button>
-                    </p>
-
-                  </div>
-                </el-col>
-              </el-row>
-            </el-container>
-
-
-            <el-container style="height: 68vh" v-show="!showMyMessage">
-              <el-row>
-                <el-col :span="24">
-                  <div
-                      v-for="(comment, index) in myComments"
-                      :key="index"
-                      style="width: 100%"
-                      class="box-card scrollable-content"
-                  >
-                    <p>
-                      <span class="author">{{ comment.username }}</span>
-                      <span v-if="comment.toUserId" class="mention"> @{{ comment.toUserName }}</span>
-                      <span>:</span>
-                      <span class="timestamp">- {{ comment.createdAt }}</span>
-                      <br>
-                      <span> {{ comment.content }}</span>
-                    </p>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-container>
+              <el-table
+                :data="toApproves"
+                class="scrolling-table"
+                max-height="85vh"
+              >
+                <el-table-column label="任务" prop="taskName"></el-table-column>
+                <el-table-column label="发起人" prop="startUserName"></el-table-column>
+                <el-table-column label="备注" prop="remarks" sortable></el-table-column>
+                <el-table-column label="请求完成" prop="forFinish">
+                  <template #default="scope">
+                    <el-tag v-if="scope.row.forFinish" type="success">是</el-tag>
+                    <el-tag v-else type="danger">否</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column>
+                  <template #default="scope">
+                    <el-button type="primary" @click="showApprove(scope.row)">审批</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
           </el-card>
         </el-col>
 
       </el-row>
     </el-main>
+
+    <el-dialog
+        title="提交审核"
+        v-model="approveDialog"
+        width="30%"
+    >
+      <el-form label-width="80px">
+        <el-form-item label="任务内容">
+          <el-input v-model="approveDetail.taskContent" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-input v-model="approveDetail.status" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="截至日期">
+          <el-input v-model="approveDetail.endTime" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input type="textarea" v-model="approveDetail.remarks"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onConfirm">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
+    <el-dialog
+      v-model="replyDialog"
+      title="回复"
+      width="30%"
+    >
+      <el-form label-width="80px">
+        <el-form-item label="回复内容">
+          <el-input v-model="replyDetail.reply" type="textarea"></el-input>
+        </el-form-item>
+        <el-form-item label="任务状态" v-if="replyDetail.forFinish">
+          <el-select v-model="replyDetail.stateId" placeholder="请选择状态">
+            <el-option
+                v-for="state in states"
+                :key="state.id"
+                :label="state.name"
+                :value="state.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onReply">回复</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
   </el-container>
 </template>
 
@@ -132,6 +156,7 @@
 import authService from "../utils/authService.js";
 import taskService from "../utils/taskService.js";
 import commentApi from "../utils/commentApi.js";
+import api from "../utils/api.js";
 
 export default {
   name: 'MyInfo',
@@ -145,10 +170,105 @@ export default {
       myComments: [],
       myMessage: [],
       showMyMessage: false,
-      unreadMessages: 0
+      unreadMessages: 0,
+      approveDetail: {
+        id: '',
+        taskContent: '',
+        status: '',
+        endTime: '',
+        remarks: '',
+        forFinish: ''
+      },
+      approveDialog: false,
+      toApproves: [],
+      replyDialog: false,
+      replyDetail: {
+        taskId: '',
+        reply: '',
+        stateId: ''
+      },
+      states: []
     }
   },
   methods: {
+    onReply() {
+      api.approveReply(this.replyDetail).then(res => {
+        this.query()
+        this.replyDialog = false
+      })
+    },
+    showApprove(data) {
+
+      api.getTaskById(data.taskId).then(res => {
+        this.replyDetail = {
+          taskId: data.taskId,
+          reply: '',
+          stateId: res.data.data.stateId,
+          forFinish: data.forFinish
+        }
+      })
+
+
+      this.replyDialog = true
+    },
+    onConfirm() {
+      this.approveDialog = false;
+      console.log(this.approveDetail)
+      api.startApproval(this.approveDetail).then(res => {
+        this.approveDialog = false;
+      })
+    },
+    startApproval(data) {
+
+      api.getApproval(data).then(res => {
+        if (res.data.data && res.data.data !== '') {
+          this.approveDetail = {
+            id: res.data.data.id,
+            taskId: data.id,
+            taskContent: data.content,
+            status: data.state.name,
+            endTime: data.endTime,
+            remarks: res.data.data.remarks,
+            forFinish: true
+          }
+        } else {
+          this.approveDetail = {
+            taskId: data.id,
+            taskContent: data.content,
+            status: data.state.name,
+            endTime: data.endTime,
+            remarks: '',
+            forFinish: true
+          }
+        }
+      })
+      this.approveDialog = true;
+    },
+    specialApproval(data) {
+      api.getApproval(data).then(res => {
+        if (res.data.data && res.data.data !== '') {
+          this.approveDetail = {
+            id: res.data.data.id,
+            taskId: data.id,
+            taskContent: data.content,
+            status: data.state.name,
+            endTime: data.endTime,
+            remarks: res.data.data.remarks,
+            forFinish: false
+          }
+        } else {
+          this.approveDetail = {
+            taskId: data.id,
+            taskContent: data.content,
+            status: data.state.name,
+            endTime: data.endTime,
+            remarks: '',
+            forFinish: false
+          }
+        }
+      })
+      this.approveDialog = true;
+    },
     getComments() {
       commentApi.getMyComments().then(res => {
         const comments = res.data.data
@@ -176,7 +296,7 @@ export default {
       });
     },
     calculateUnreadMessages() {
-      const ids =  localStorage.getItem('readMessageIds')
+      const ids = localStorage.getItem('readMessageIds')
       console.log('ids' + ids)
       if (ids) {
         const readIds = ids.split(',')
@@ -191,16 +311,24 @@ export default {
       const ids = this.myMessage.map(comment => comment.id).join(',')
       localStorage.setItem('readMessageIds', ids)
       this.unreadMessages = 0
+    },
+    query() {
+      authService.getMyInfo().then(res => {
+        this.user = res.data.data
+      })
+      taskService.getMyTasks().then(res => {
+        this.tasks = res.data.data
+      })
+      api.getToApprove().then(res => {
+        this.toApproves = res.data.data;
+      })
+      api.getStates().then(res => {
+        this.states = res.data.data
+      })
     }
   },
-   mounted() {
-    authService.getMyInfo().then(res => {
-      this.user = res.data.data
-    })
-    taskService.getMyTasks().then(res => {
-      this.tasks = res.data.data
-    })
-     this.getComments()
+  mounted() {
+   this.query()
 
   },
 

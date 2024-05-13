@@ -201,6 +201,7 @@ export default {
     api.getRoles().then(res => {
       this.roles = res.data.data
     })
+    this.query();
   }
 }
 </script>

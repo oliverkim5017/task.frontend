@@ -64,6 +64,11 @@ const routes = [
                 path: 'OperationLog',
                 name: 'OperationLog',
                 component: () => import('../components/views/OperationLog.vue')
+            },
+            {
+                path: 'ChangePassword',
+                name: 'ChangePassword',
+                component: () => import('../components/views/ChangePassword.vue')
             }
         ]
     }

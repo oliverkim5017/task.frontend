@@ -10,7 +10,7 @@
           text-color="#fff"
           active-text-color="#ffd04b"
       >
-        <el-menu-item index="2" @click="">修改密码</el-menu-item>
+        <el-menu-item index="2" @click="navigateTo('ChangePassword')">修改密码</el-menu-item>
         <el-menu-item index="3" @click="logout">登出</el-menu-item>
       </el-menu>
     </el-header>

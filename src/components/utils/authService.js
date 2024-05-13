@@ -28,5 +28,12 @@ export default {
             url: '/myInfo',
             method: 'get'
         });
+    },
+    changePassword(data) {
+        return request({
+            url: '/changePassword',
+            method: 'post',
+            data: data
+        })
     }
 };

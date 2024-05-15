@@ -25,6 +25,7 @@
         >
           <el-menu-item index="1" @click="navigateTo('MyInfo')">主页</el-menu-item>
           <el-menu-item index="10" @click="navigateTo('TaskBoard')"><el-icon><Menu /></el-icon>看板</el-menu-item>
+          <el-menu-item index="11" @click="navigateTo('ApproveHistory')"><el-icon><Menu /></el-icon>审批纪录</el-menu-item>
           <el-sub-menu index="20" v-if="role.name !== '组员'">
             <template #title>项目视图</template>
             <el-menu-item index="20-1" @click="navigateTo('Project')"><el-icon><Management /></el-icon>项目管理</el-menu-item>

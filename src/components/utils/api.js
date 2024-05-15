@@ -188,5 +188,11 @@ export default {
                 month: data.month
             }
         })
+    },
+    getApproveDetails() {
+        return request({
+            url: '/getApproveDetails',
+            method: 'get',
+        })
     }
 }

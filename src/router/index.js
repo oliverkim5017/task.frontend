@@ -69,6 +69,11 @@ const routes = [
                 path: 'ChangePassword',
                 name: 'ChangePassword',
                 component: () => import('../components/views/ChangePassword.vue')
+            },
+            {
+                path: 'ApproveHistory',
+                name: 'ApproveHistory',
+                component: () => import('../components/views/ApproveHistory.vue')
             }
         ]
     }
